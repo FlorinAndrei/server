@@ -1,0 +1,7 @@
+{
+  "system_profile": {
+    "interval": 10,
+    "prefix_at_start": false,
+    "handler": "relay"
+  }
+}

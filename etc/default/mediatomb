@@ -1,0 +1,34 @@
+## This is a sambel configuration file for the MediaTomb daemon script
+## used on Fedora Core
+## also used by Debian, since Jessie release
+
+## By default the configuration will be created in /etc/mediatomb
+
+## Network interface on which the server will run, you need to edit this!
+MT_INTERFACE="enp3s0"
+
+## User defined command line options that may be passed to the server
+MT_OPTIONS=""
+
+## MediaTomb will be started on port 50500
+MT_PORT="50500"
+
+## MediaTomb will run as mediatomb
+MT_USER="mediatomb"
+MT_GROUP="mediatomb"
+
+## Location of the PID file
+MT_PIDFILE="/var/run/mediatomb.pid"
+
+## Location of the log file
+MT_LOGFILE="/var/log/mediatomb"
+
+## Location of the config file/database
+MT_HOME="/etc"
+MT_CFGDIR="mediatomb"
+
+# Debian: keep for compat with old sysv init script
+# The route command and arguments to be used if INTERFACE is defined.
+# These variables should normally be left unmodified.
+ROUTE_ADD="/sbin/route add -net 239.0.0.0 netmask 255.0.0.0"
+ROUTE_DEL="/sbin/route del -net 239.0.0.0 netmask 255.0.0.0"

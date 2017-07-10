@@ -1,0 +1,19 @@
+{
+  "sensu": [
+    {
+      "name": "home",
+      "host": "127.0.0.1",
+      "port": 4567
+    }
+  ],
+  "uchiwa": {
+    "host": "0.0.0.0",
+    "port": 3000,
+    "user": "admin",
+    "pass": "secret",
+    "ssl": {
+      "certfile": "/etc/letsencrypt/live/andrei.myip.org/fullchain.pem",
+      "keyfile": "/etc/letsencrypt/live/andrei.myip.org/privkey.pem"
+    }
+  }
+}

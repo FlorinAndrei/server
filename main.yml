@@ -1,0 +1,369 @@
+---
+- hosts: all
+  tasks:
+
+  - name: install packages
+    apt: name={{ item }} state=present
+    with_items:
+    - htop
+    - mc
+    - tcpdump
+    - nmap
+    - dovecot-imapd
+    - dovecot-sieve
+    - dovecot-managesieved
+    - postfix
+    - ntp
+    - amavisd-new
+    - spamassassin
+    - clamav-daemon
+    - clamav-freshclam
+    - telnet
+    - apache2
+#    - python-letsencrypt-apache
+    - mysql-server
+    - php
+    - libapache2-mod-php
+    - libapache2-mod-wsgi
+    - php-mcrypt
+    - php-mysql
+    - php-mbstring
+    - php-zip
+    - php-dom
+    - php-intl
+    - php-exif
+    - php-gd
+    - man
+    - mediatomb
+    - lsof
+    - vsftpd
+    - samba
+    - apt-transport-https
+    - python-txamqp
+    - fail2ban
+
+  - name: install imapsync dependencies
+    apt: name={{ item }} state=present
+    with_items:
+    - libdigest-hmac-perl
+    - libterm-readkey-perl
+    - libio-socket-ssl-perl
+    - libdate-manip-perl
+    - libmail-imapclient-perl
+    - libnet-ssleay-perl
+    - libparse-recdescent-perl
+    - libauthen-ntlm-perl
+    - libclass-load-perl
+    - libcrypt-ssleay-perl
+    - libdata-uniqid-perl
+    - libdist-checkconflicts-perl
+    - libfile-copy-recursive-perl
+    - libio-compress-perl
+    - libio-socket-inet6-perl
+    - libio-socket-ssl-perl
+    - libio-tee-perl
+    - libmail-imapclient-perl
+    - libmodule-scandeps-perl
+    - libnet-ssleay-perl
+    - libpar-packer-perl
+    - libreadonly-perl
+    - libsys-meminfo-perl
+    - libterm-readkey-perl
+    - libtest-fatal-perl
+    - libtest-mock-guard-perl
+    - libtest-pod-perl
+    - libtest-requires-perl
+    - libtest-simple-perl
+    - libunicode-string-perl
+    - liburi-perl
+    - make
+    - cpanminus
+
+  - name: install Amavis dependencies
+    apt: name={{ item }} state=present
+    with_items:
+    - lrzip
+    - lzop
+    - rpm2cpio
+    - unrar
+    - arj
+    - arc
+    - zoo
+    - ripole
+    - cabextract
+    - p7zip
+    - p7zip-full
+    - liblz4-tool
+    - unrar-free
+
+  - name: configure system (executables)
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0755
+    with_items:
+    - etc/rc.local
+
+  - name: configure system (non-exec)
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/sudoers.d/91-nopasswd
+
+# https://github.com/imapsync/imapsync
+# http://imapsync.lamiral.info/
+  - name: install imapsync
+    template: src=imapsync dest=/usr/local/bin/imapsync owner=root group=root mode=0755
+
+  - name: configure dovecot
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/dovecot/conf.d/10-auth.conf
+    - etc/dovecot/conf.d/10-mail.conf
+    - etc/dovecot/conf.d/10-master.conf
+    - etc/dovecot/conf.d/10-ssl.conf
+    - etc/dovecot/conf.d/15-lda.conf
+
+  - name: configure Postfix
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/postfix/main.cf
+    - etc/postfix/sasl_passwd
+    - etc/aliases
+    - etc/mailname
+
+  - name: run postmap on hashes
+    shell: postmap {{ item }}
+    with_items:
+    - /etc/postfix/sasl_passwd
+
+  - name: run newaliases
+    shell: newaliases
+
+  - name: configure ClamAV
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/clamav/clamd.conf
+
+  - name: add user clamav to the amavis group
+    user: name=clamav groups=amavis append=yes state=present
+
+  - name: enable/start ClamAV daemon
+    service: name=clamav-daemon enabled=yes state=started
+
+  - name: configure Spamassassin
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/spamassassin/local.cf
+
+  - name: configure Amavis
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/amavis/conf.d/15-content_filter_mode
+    - etc/amavis/conf.d/50-user
+
+  - name: enable Apache modules
+    file: src=/etc/apache2/mods-available/{{ item }} dest=/etc/apache2/mods-enabled/{{ item }} state=link
+    with_items:
+    - ssl.conf
+    - ssl.load
+    - socache_shmcb.load
+
+  - name: Apache config files
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/apache2/ports.conf
+
+  - name: create Apache vhosts
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/apache2/sites-available/000-default.conf
+    - etc/apache2/sites-available/andrei.myip.org.conf
+    - etc/apache2/sites-available/florin.myip.org.conf
+
+  - name: enable Apache vhosts
+    file: src=/etc/apache2/sites-available/{{ item }} dest=/etc/apache2/sites-enabled/{{ item }} state=link
+    with_items:
+    - andrei.myip.org.conf
+    - florin.myip.org.conf
+
+  - name: install Nginx
+    apt: name=nginx state=present
+
+  - name: configure Nginx
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/nginx/conf.d/0-log-format.conf
+    - etc/nginx/conf.d/florin.myip.org.conf
+    - etc/nginx/conf.d/andrei.myip.org.conf
+
+# https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04
+  - name: enable Certbot PPA
+    apt_repository: repo='ppa:certbot/certbot' state=present
+
+  - name: install Certbot
+    apt: name=certbot state=present
+
+  - name: reminder for certbot command to get the SSL certs
+    debug: msg="certbot certonly --webroot --webroot-path=/var/www/example.com -d andrei.myip.org -d florin.myip.org"
+
+#  - name: create cron job to auto-update the SSL certs
+#    cron: name=letsencrypt day=1 hour=3 minute=17 state=present user=root job="/usr/bin/letsencrypt renew | /usr/bin/logger -t letsencrypt"
+
+  - name: create cron job to auto-update the SSL certs
+    cron: name=certbot day=1 hour=3 minute=17 state=present user=root job="/usr/bin/certbot renew --renew-hook \"/bin/systemctl reload nginx dovecot postfix\" | /usr/bin/logger -t certbot"
+
+  - name: enable webupd8 PPA for Java
+    apt_repository: repo='ppa:webupd8team/java' state=present update_cache=yes
+
+  - name: install python-software-properties for add-apt-repository
+    apt: name=python-software-properties state=present
+
+  - name: "Is the Oracle license already accepted?"
+    shell: debconf-get-selections | grep "oracle-java8-installer[[:space:]]shared/accepted-oracle-license-v1-1[[:space:]]select[[:space:]]true" | wc -l
+    register: oracle_license
+  # The above command changes nothing, so don't claim a state change here, ever.
+    changed_when: False
+    always_run: True
+
+  - name: "Accept Oracle's license terms"
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    when: oracle_license.stdout != "1"
+
+  - name: install Java
+    apt: name={{ item }} state=present
+    with_items:
+    - oracle-java8-installer
+    - oracle-java8-set-default
+    - oracle-java8-unlimited-jce-policy
+
+  - name: mediatomb defaults
+    template: src=etc/default/mediatomb dest=/etc/default/mediatomb owner=root group=root mode=0644
+
+  - name: mediatomb config
+    template: src=etc/mediatomb/config.xml dest=/etc/mediatomb/config.xml owner=mediatomb group=mediatomb mode=0644
+
+  - name: enable/start Mediatomb
+    service: name=mediatomb enabled=yes state=started
+
+  - name: config vsftpd
+    template: src=etc/vsftpd.conf dest=/etc/vsftpd.conf owner=root group=root mode=0644
+
+  - name: configure samba
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/samba/smb.conf
+
+  - name: set generic aliases for all users
+    template: src=etc/profile.d/aliases.sh dest=/etc/profile.d/aliases.sh mode=0644 owner=root
+
+  - name: install RabbitMQ apt repo key
+    apt_key: url="https://www.rabbitmq.com/rabbitmq-release-signing-key.asc" state=present
+
+  - name: add RabbitMQ repo
+    apt_repository: repo="deb http://www.rabbitmq.com/debian/ testing main" filename="rabbitmq" state=present update_cache=yes
+    ignore_errors: yes
+
+  - name: install RabbitMQ
+    apt: name=rabbitmq-server state=present
+
+  - name: configure RabbitMQ
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/default/rabbitmq-server
+
+  - name: create RabbitMQ vhost for Sensu
+    rabbitmq_vhost: name="/sensu" state=present
+
+  - name: create RabbitMQ user and permissions for Sensu
+    rabbitmq_user:
+      user: sensu
+      password: sunse
+      vhost: /sensu
+      configure_priv: .*
+      read_priv: .*
+      write_priv: .*
+      state: present
+
+  - name: install Sensu apt repo key
+    apt_key: url="https://sensu.global.ssl.fastly.net/apt/pubkey.gpg" state=present
+
+  - name: add Sensu repo
+    apt_repository: repo="deb https://sensu.global.ssl.fastly.net/apt xenial main" filename="sensu" state=present update_cache=yes
+    ignore_errors: yes
+
+  - name: install Sensu and Uchiwa
+    apt: name={{ item }} state=present
+    with_items:
+    - sensu
+    - uchiwa
+
+  - name: install Redis
+    apt: name=redis-server state=present
+
+  - name: install Graphite
+    apt: name={{ item }} state=present
+    with_items:
+    - graphite-api
+    - graphite-carbon
+    - graphite-web
+
+  - name: configure Graphite
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/carbon/storage-schemas.conf
+    - etc/carbon/carbon.conf
+    - etc/apache2/sites-available/apache2-graphite.conf
+    - etc/graphite/local_settings.py
+
+# sudo -u _graphite graphite-manage syncdb --noinput
+
+  - name: enable graphite-web vhost
+    file: src=/etc/apache2/sites-available/{{ item }} dest=/etc/apache2/sites-enabled/{{ item }} state=link
+    with_items:
+    - apache2-graphite.conf
+
+  - name: configure Sensu
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/sensu/conf.d/redis.json
+    - etc/sensu/conf.d/rabbitmq.json
+    - etc/sensu/conf.d/client.json
+    - etc/sensu/conf.d/transport.json
+    - etc/sensu/conf.d/api.json
+    - etc/sensu/extensions/system-profile.rb
+    - etc/sensu/conf.d/system_profile.json
+    - etc/sensu/conf.d/extensions.json
+    - etc/sensu/conf.d/relay.json
+    - etc/sensu/extensions/handlers/relay.rb
+    - etc/sensu/extensions/mutators/metrics.rb
+
+  - name: start Sensu
+    service: name={{ item }} enabled=yes state=started
+    with_items:
+    - sensu-server
+    - sensu-client
+    - sensu-api
+
+  - name: configure Uchiwa
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/sensu/uchiwa.json
+
+  - name: start Uchiwa
+    service: name=uchiwa enabled=yes state=started
+
+  - name: install Grafana apt repo key
+    apt_key: url="https://packagecloud.io/gpg.key" state=present
+
+  - name: add Grafana repo
+    apt_repository: repo="deb https://packagecloud.io/grafana/stable/debian/ jessie main" filename="grafana" state=present update_cache=yes
+    ignore_errors: yes
+
+  - name: install Grafana
+    apt: name="grafana" state=present
+
+  - name: configure Grafana
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/grafana/grafana.ini
+    - etc/default/grafana-server
+
+  - name: start Grafana
+    service: name=grafana-server enabled=yes state=started
