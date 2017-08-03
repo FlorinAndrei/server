@@ -209,7 +209,14 @@
 #    cron: name=letsencrypt day=1 hour=3 minute=17 state=present user=root job="/usr/bin/letsencrypt renew | /usr/bin/logger -t letsencrypt"
 
   - name: create cron job to auto-update the SSL certs
-    cron: name=certbot day=1 hour=3 minute=17 state=present user=root job="/usr/bin/certbot renew --renew-hook \"/bin/systemctl reload nginx dovecot postfix\" | /usr/bin/logger -t certbot"
+    cron:
+      name: certbot
+      day: 1
+      hour: 3
+      minute: 17
+      state: present
+      user: root
+      job: '/usr/bin/certbot renew --renew-hook "/bin/systemctl reload nginx dovecot postfix" | /usr/bin/mail -s certbot -a "From: florin@andrei.myip.org" florin.andrei@gmail.com'
 
   - name: enable webupd8 PPA for Java
     apt_repository: repo='ppa:webupd8team/java' state=present update_cache=yes
