@@ -42,6 +42,7 @@
     - python-txamqp
     - fail2ban
     - apt-file
+    - mailutils
 
   - name: install imapsync dependencies
     apt: name={{ item }} state=present
