@@ -43,6 +43,10 @@
     - fail2ban
     - apt-file
     - mailutils
+    - python-pip
+
+  - name: install Python modules
+    pip: name=awscli
 
   - name: install imapsync dependencies
     apt: name={{ item }} state=present
