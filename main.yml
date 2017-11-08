@@ -220,7 +220,7 @@
       minute: 17
       state: present
       user: root
-      job: '/usr/bin/certbot renew --renew-hook "/bin/systemctl reload nginx dovecot postfix" | /usr/bin/mail -s certbot -a "From: florin@andrei.myip.org" florin.andrei@gmail.com'
+      job: '/usr/bin/certbot renew --renew-hook "/bin/systemctl reload nginx dovecot postfix grafana-server" | /usr/bin/mail -s certbot -a "From: florin@andrei.myip.org" florin.andrei@gmail.com'
 
   - name: enable webupd8 PPA for Java
     apt_repository: repo='ppa:webupd8team/java' state=present update_cache=yes
