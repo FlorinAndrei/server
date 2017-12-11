@@ -380,3 +380,12 @@
 
   - name: start Grafana
     service: name=grafana-server enabled=yes state=started
+
+  - name: enable Nvidia driver repo
+    apt_repository: repo='ppa:graphics-drivers' state=present update_cache=yes
+
+  - name: install Nvidia drivers
+    apt: name=nvidia-384 state=present
+
+  - name: disable Avahi
+    service: name=avahi-daemon enabled=no state=stopped
