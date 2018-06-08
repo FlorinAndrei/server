@@ -133,6 +133,8 @@
     - etc/postfix/sasl_passwd
     - etc/aliases
     - etc/mailname
+    tags:
+    - postfix
 
   - name: run postmap on hashes
     shell: postmap {{ item }}
@@ -141,6 +143,8 @@
 
   - name: run newaliases
     shell: newaliases
+    tags:
+    - postfix
 
   - name: configure ClamAV
     template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
