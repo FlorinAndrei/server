@@ -40,7 +40,6 @@
     - samba
     - apt-transport-https
     - python-txamqp
-    - fail2ban
     - apt-file
     - mailutils
     - python-pip
