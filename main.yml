@@ -43,6 +43,7 @@
     - apt-file
     - mailutils
     - python-pip
+    - geoip-bin
 
   - name: install Python modules
     pip: name=awscli
