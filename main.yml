@@ -46,7 +46,10 @@
     - geoip-bin
 
   - name: install Python modules
-    pip: name=awscli
+    pip: name={{ item }}
+    with_items:
+    - awscli
+    - geoip2
 
   - name: install imapsync dependencies
     apt: name={{ item }} state=present
