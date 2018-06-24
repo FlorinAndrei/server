@@ -44,6 +44,8 @@
     - mailutils
     - python-pip
     - geoip-bin
+    - lame
+    - ffmpeg
 
   - name: install Python modules
     pip: name={{ item }}
