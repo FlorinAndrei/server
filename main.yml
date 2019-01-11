@@ -242,7 +242,7 @@
     register: oracle_license
   # The above command changes nothing, so don't claim a state change here, ever.
     changed_when: False
-    always_run: True
+    check_mode: no
 
   - name: "Accept Oracle's license terms"
     shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
