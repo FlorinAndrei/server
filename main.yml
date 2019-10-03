@@ -386,6 +386,8 @@
     with_items:
     - etc/grafana/grafana.ini
     - etc/default/grafana-server
+    tags:
+    - grafana_config
 
   - name: start Grafana
     service: name=grafana-server enabled=yes state=started
