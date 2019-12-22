@@ -349,12 +349,22 @@
     - etc/sensu/conf.d/client.json
     - etc/sensu/conf.d/transport.json
     - etc/sensu/conf.d/api.json
+    - etc/sensu/conf.d/metrics.json
     - etc/sensu/extensions/system-profile.rb
     - etc/sensu/conf.d/system_profile.json
     - etc/sensu/conf.d/extensions.json
     - etc/sensu/conf.d/relay.json
     - etc/sensu/extensions/handlers/relay.rb
     - etc/sensu/extensions/mutators/metrics.rb
+    tags:
+    - sensu-config
+
+  - name: Sensu plugins
+    template:  src={{ item }} dest=/{{ item }} owner=root group=root mode=755
+    with_items:
+    - etc/sensu/plugins/metrics-disk-usage.rb
+    tags:
+    - sensu-config
 
   - name: start Sensu
     service: name={{ item }} enabled=yes state=started
