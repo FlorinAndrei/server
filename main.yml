@@ -363,6 +363,7 @@
     template:  src={{ item }} dest=/{{ item }} owner=root group=root mode=755
     with_items:
     - etc/sensu/plugins/metrics-disk-usage.rb
+    - etc/sensu/plugins/metrics-memory-percent.rb
     tags:
     - sensu-config
 
