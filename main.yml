@@ -364,6 +364,7 @@
     with_items:
     - etc/sensu/plugins/metrics-disk-usage.rb
     - etc/sensu/plugins/metrics-memory-percent.rb
+    - etc/sensu/plugins/metrics-temperature.rb
     tags:
     - sensu-config
 

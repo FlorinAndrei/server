@@ -13,6 +13,13 @@
       "standalone": true,
       "interval": 10,
       "handlers": ["relay"]
+    },
+    "metrics-temperature": {
+      "type": "metric",
+      "command": "/etc/sensu/plugins/metrics-temperature.rb",
+      "standalone": true,
+      "interval": 10,
+      "handlers": ["relay"]
     }
   }
 }
