@@ -421,3 +421,13 @@
 
   - name: disable Avahi
     service: name=avahi-daemon enabled=no state=stopped
+
+  - name: add Golang repo
+    apt_repository: repo="ppa:longsleep/golang-backports" filename="golang" state=present update_cache=yes
+    tags:
+    - golang
+
+  - name: install Golang
+    apt: name="golang-go" state=present
+    tags:
+    - golang
