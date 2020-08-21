@@ -431,3 +431,21 @@
     apt: name="golang-go" state=present
     tags:
     - golang
+
+  - name: install apcupsd
+    apt: name="apcupsd" state=present
+    tags:
+    - ups
+
+  - name: configure apcupsd
+    template: src={{ item }} dest=/{{ item }} owner=root group=root mode=0644
+    with_items:
+    - etc/apcupsd/apcupsd.conf
+    - etc/default/apcupsd
+    tags:
+    - ups
+
+  - name: enable/start apcupsd
+    service: name=apcupsd enabled=yes state=started
+    tags:
+    - ups
